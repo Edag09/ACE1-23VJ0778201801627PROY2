@@ -1,25 +1,48 @@
+print macro buffer ;imprime cadena
+PUSH AX ;guarda AX en la pila
+PUSH DX ;guarda DX en la pila
+
+    MOV AX, @DATA ;carga la direccion de memoria de la variable
+    MOV DS, AX ;mueve la direccion de memoria a DS
+    MOV AH, 9 ;carga el valor 9 en AH
+    MOV DX, OFFSET buffer ;carga la direccion de memoria de la variable
+    INT 21H ;interrupcion del DOS
+
+POP DX ;recupera DX de la pila
+POP AX ;recupera AX de la pila
+ENDM
+
 NADA        equ      00
 JUGADOR     equ      01
 PARED       equ      02
-
 OBJETIVO    equ      04
 SUELO       equ      05
 CAJA_OBJ	equ      06
+
 .MODEL SMALL
 .RADIX 16
 .STACK
 .DATA
+;;
+	msg_linea	           db     '----------------------------------------', '$'
+    msg_universidad		   db     '|Universidad de San Carlos de Guatemala|', '$'
+    msg_facultad		   db     '|Facultad de Ingenieria                |', '$'
+    msg_escuela		       db     '|Escuela de Ciencias y Sistemas        |', '$'
+    msg_arqui		       db     '|ACE 1                                 |', '$'
+    msg_nombre		       db     '|Eduardo Rene Agustin Mendoza          |', '$'
+    msg_carne		       db     '|201801627                             |', '$'
+    msg_linea2		       db     '----------------------------------------', '$'
+;;
 CAJA        db      3
 dim_sprite_jug    db   08, 08
-
-data_sprite_jug   db   5c, 5c, 55, 55, 55, 55, 5c, 5c
-                  db   5c, 55, 55, 55, 55, 55, 55, 5c
-                  db   5c, 3E, 55, 0FEh, 55, 0FEh, 55, 5c
-                  db   3E, 55, 55, 36, 55, 36, 55, 3E
-                  db   3E, 55, 55, 55, 55, 55, 55, 3E
-                  db   5c, 3E, 3E, 55, 55, 55, 3E, 5c
-                  db   5c, 24, 3E, 3E, 55, 55, 24, 5c
-                  db   5c, 24, 24, 24, 5c, 24, 24, 5c
+data_sprite_jug   db   70,70, 70, 70, 70, 70, 70, 70
+                  db   70, 1C, 70, 70, 70, 70, 70, 70
+                  db   1C, 1C, 1C, 35, 35, 35, 70, 70
+                  db   1C, 1C, 35, 35, 0F, 35, 35, 70
+                  db   1C, 1C, 35, 0F, 0F, 0F, 35, 70
+                  db   70, 1C, 35, 35, 0F, 35, 35, 70
+                  db   70, 70, 70, 35, 35, 35, 70, 70
+                  db   70, 70, 70, 70, 70, 70, 70, 70
 dim_sprite_flcha  db   08, 08
 data_sprite_flcha   db   00, 00, 03, 00, 00, 00, 00, 00
                     db   00, 00, 03, 03, 00, 00, 00, 00
@@ -39,43 +62,42 @@ data_sprite_vacio db   00, 00, 00, 00, 00, 00, 00, 00
                   db   00, 00, 00, 00, 00, 00, 00, 00
                   db   00, 00, 00, 00, 00, 00, 00, 00
 dim_sprite_suelo  db   08, 08
-data_sprite_suelo db   5c, 5c, 5c, 5c, 5c, 5c, 5c, 5c
-                  db   5c, 5c, 5c, 5c, 5c, 5c, 5c, 5c
-                  db   5c, 5c, 5c, 5c, 5c, 5c, 5c, 5c
-                  db   5c, 5c, 5c, 5c, 5c, 5c, 5c, 5c
-                  db   5c, 5c, 5c, 5c, 5c, 5c, 5c, 5c
-                  db   5c, 5c, 5c, 5c, 5c, 5c, 5c, 5c
-                  db   5c, 5c, 5c, 5c, 5c, 5c, 5c, 5c
-                  db   5c, 5c, 5c, 5c, 5c, 5c, 5c, 5c
+data_sprite_suelo db   70, 70, 70, 70, 70, 70, 70, 70
+                  db   70, 70, 70, 70, 70, 70, 70, 70
+                  db   70, 70, 70, 70, 70, 70, 70, 70
+                  db   70, 70, 70, 70, 70, 70, 70, 70
+                  db   70, 70, 70, 70, 70, 70, 70, 70
+                  db   70, 70, 70, 70, 70, 70, 70, 70
+                  db   70, 70, 70, 70, 70, 70, 70, 70
+                  db   70, 70, 70, 70, 70, 70, 70, 70
 dim_sprite_pared  db   08, 08
-data_sprite_pared db   35, 35, 0f, 0f, 35, 35, 0f, 0f
-                  db   35, 0f, 0f, 35, 35, 0f, 0f, 35
-                  db   0f, 0f, 35, 35, 0f, 0f, 35, 35
-                  db   0f, 35, 35, 0f, 0f, 35, 35, 0f
-                  db   35, 35, 0f, 0f, 35, 35, 0f, 0f
-                  db   35, 0f, 0f, 35, 35, 0f, 0f, 35
-                  db   0f, 0f, 35, 35, 0f, 0f, 35, 35
-                  db   0f, 35, 35, 0f, 0f, 35, 35, 0f
+data_sprite_pared db   06, 06, 06, 12, 06, 06, 06, 12
+                  db   12, 06, 06, 06, 12, 06, 06, 06
+                  db   06, 06, 06, 12, 06, 06, 06, 12
+                  db   12, 06, 06, 06, 12, 06, 06, 06
+                  db   06, 06, 06, 12, 06, 06, 06, 12
+                  db   12, 06, 06, 06, 12, 06, 06, 06
+                  db   06, 06, 06, 12, 06, 06, 06, 12
+                  db   12, 06, 06, 06, 12, 06, 06, 06
 dim_sprite_caja   db   08, 08
-data_sprite_caja  db  5c,5c,5c,5c,5c,5c,5c,5c
-                  db  5c,5c,0b8,0b8,0b8,0b8,5c,5c
-                  db  5c,0b8,8a,8a,8a,8a,0b8,5c
-                  db  5c,0b8,8a,8a,8a,8a,0b8,5c
-                  db  5c,0b8,8a,8a,8a,8a,0b8,5c
-                  db  5c,0b8,8a,8a,8a,8a,0b8,5c
-                  db  5c,5c,0b8,0b8,0b8,0b8,5c,5c
-                  db  5c,5c,5c,5c,5c,5c,5c,5c
+data_sprite_caja  db  70,70,70,70,70,70,0F,70
+                  db  70,70,70,70,70,0F,70,70
+                  db  70,70,70,70,0F,70,70,70
+                  db  70,70,20,20,20,20,70,70
+                  db  70,20,20,20,35,20,20,70
+                  db  70,20,20,35,0F,35,20,70
+                  db  70,20,20,20,35,20,20,70
+                  db  70,70,20,20,20,20,70,70
 dim_sprite_obj    db   08, 08
-data_sprite_obj   db  5c,5c,5c,5c,5c,5c,5c,5c
-                  db  5c,28,5c,5c,5c,5c,28,5c
-                  db  5c,5c,28,5c,5c,28,5c,5c
-                  db  5c,5c,5c,28,28,5c,5c,5c
-                  db  5c,5c,5c,28,28,5c,5c,5c
-                  db  5c,5c,28,5c,5c,28,5c,5c
-                  db  5c,28,5c,5c,5c,5c,28,5c
-                  db  5c,5c,5c,5c,5c,5c,5c,5c
+data_sprite_obj   db  70,70,70,70,70,70,70,70
+                  db  70,70,70,2C,70,70,70,70
+                  db  70,70,2C,2C,2C,70,70,70
+                  db  70,70,2C,70,2C,70,70,70
+                  db  70,2C,2C,2C,2C,2C,70,70
+                  db  2C,2C,2C,2C,2C,2C,2C,70
+                  db  70,70,70,70,70,70,70,70
+                  db  70,70,70,70,70,70,70,70
 mapa              db   3e8 dup (0)
-
 iniciar_juego db "INICIAR JUEGO$"
 cargar_nivel  db "CARGAR NIVEL$"
 configuracion db "CONFIGURACION$"
@@ -116,12 +138,21 @@ numero        db  5 dup (30)
 encima_obj   db  0
 .CODE
 .STARTUP
+
 inicio:
 		;; MODO VIDEO ;;
 		mov AH, 00
 		mov AL, 13
 		int 10
 		;;;;;;;;;;;;;;;;
+		call imprimir_datos_personales
+    	call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
 		call menu_principal
 		mov AL, [opcion]
 		;; > INICIAR JUEGO
@@ -391,8 +422,6 @@ fin_delay:
 		pop DI
 		pop SI
 		ret
-		
-
 ;; clear_pantalla - limpia la pantalla
 ;; ..
 ;; ..
@@ -1396,8 +1425,6 @@ agregar_punto:
 		add puntos, 1
 		mov CAJA, 6
 		ret
-
-
 ;; siguiente_linea - extrae la siguiente línea del archivo referenciado por el handle en BX
 ;; ENTRADA:
 ;;    - BX: handle
@@ -1432,8 +1459,18 @@ quitar_nl_y_fin:
 fin_siguiente_linea:
 		mov DL, 0ff   ;; ya finalizó el archivo
 		ret
+;;
+imprimir_datos_personales:
+    print msg_linea
+    print msg_universidad
+    print msg_facultad
+    print msg_escuela
+    print msg_arqui
+    print msg_nombre
+    print msg_carne
+    print msg_linea2
 
-
+;;
 ;; cadena_igual - verifica que dos cadenas sean iguales
 ;; ENTRADA:
 ;;    - SI: cadena 1, con su tamaño en el primer byte
@@ -1554,5 +1591,5 @@ retorno_cadenaAnum:
 
 
 fin:
-.EXIT
+	.EXIT
 END
