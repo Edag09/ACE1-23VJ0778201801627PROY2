@@ -29,13 +29,12 @@ CAJA_OBJ	equ      06
     msg_facultad		   db     "|Facultad de Ingenieria                |", "$"
     msg_escuela		       db     "|Escuela de Ciencias y Sistemas        |", "$"
     msg_arqui		       db     "|Arquitectura de Computadoras          |", "$"
-	epacio			       db     "|y Ensambladores 1                     |", "$"
+	msg_arqui1			   db     "|y Ensambladores 1                     |", "$"
     msg_nombre		       db     "|Eduardo Rene Agustin Mendoza          |", "$"
     msg_carne		       db     "|201801627                             |", "$"
     msg_linea2		       db     "========================================", "$"
 ;;
 CAJA        db      3
-puntaje_estandar		  db "PUNTAJE: 0000$"
 
 dim_sprite_jug    db   08, 08
 data_sprite_jug   db   28, 79, 79, 29, 29, 29, 29, 29
@@ -97,6 +96,16 @@ data_sprite_caja  db  79,79,28,28,28,79,79,79
                   db  79,0F,0F,0F,0F,0F,79,79
                   db  79,79,0F,0F,0F,79,79,79
 
+dim_sprite_cobj   db   08, 08
+data_sprite_cobj  db  79,79,30,00,30,79,79,79
+                  db  79,00,30,30,30,00,79,79
+                  db  79,00,30,00,30,00,79,79
+                  db  00,00,00,00,00,00,00,79
+                  db  00,00,00,0F,00,00,00,79
+                  db  0F,0F,0F,00,0F,0F,0F,79
+                  db  79,0F,0F,0F,0F,0F,79,79
+                  db  79,79,0F,0F,0F,79,79,79
+
 dim_sprite_obj    db   08, 08
 data_sprite_obj   db  79,00,00,00,00,79,79,79
                   db  79,00,00,79,79,00,79,79
@@ -114,10 +123,20 @@ configuracion db "CONFIGURACION$"
 puntajes      db "PUNTAJES ALTOS$"
 salir         db "SALIR$"
 iniciales     db "ERAM - 201801627$"
+cambio        db "Presiona la tecla que quieres cambiar","$"
+puntaje_estandar db "PUNTAJE: $"
+mensaje_control_arriba db "CONTROL ARRIBA: $"
+mensaje_control_abajo  db "CONTROL ABAJO: $"
+mensaje_control_izquierda db "CONTROL IZQUIERDA: $"
+mensaje_control_derecha db "CONTROL DERECHA: $"
+;; MENU PAUSA
+pausa_cont	db	"CONTINUAR$"
+pausa_salir	db	"SALIR$"
 ;; JUEGO
 xJugador      db 0
 yJugador      db 0
-puntos        dw 0
+puntos_obj    dw 0
+puntos_par    dw 3d
 ;; MENÚS
 opcion        db 0
 maximo        db 0
@@ -129,7 +148,11 @@ control_abajo     db  50
 control_izquierda db  4bh
 control_derecha   db  4dh
 ;; NIVELES
-nivel_x           db  "NIV.TXT",00
+nivel_x           db  "NIV.11",00
+nivel_0           db  "NIV.00",00
+nivel_1           db  "NIV.01",00
+nivel_2           db  "NIV.10",00
+nivel_3           db  "NIV.11",00
 handle_nivel      dw  0000
 linea             db  100 dup (0)
 elemento_actual   db  0
@@ -144,19 +167,18 @@ tk_objetivo   db  08,"objetivo"
 tk_coma       db  01,","
 ;;
 numero        db  5 dup (30)
+numero2        db  '0004',0
+niveles 	  dw  0
 ;;
 encima_obj   db  0
 .CODE
 .STARTUP
-
-inicio:
+first:
 		;; MODO VIDEO ;;
 		mov AH, 00
 		mov AL, 13
 		int 10
-		;;;;;;;;;;;;;;;;
 		call imprimir_datos_personales
-    	call delay
 		call delay
 		call delay
 		call delay
@@ -168,39 +190,21 @@ inicio:
 		call delay
 		call delay
 		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
+inicio:
+		mov puntos_obj, 0
+		mov puntos_par, 0
+		mov niveles, 0
+		;;;;;;;;;;;;;;;;
 		call menu_principal
 		mov AL, [opcion]
 		;; > INICIAR JUEGO
 		cmp AL, 0
-		je ciclo_juego
+		je cargar_un_nivel0
 		;; > CARGAR NIVEL
 		cmp AL, 1
-		je cargar_un_nivel
+		je cargar_un_nivel 
+		cmp AL, 3
+		je entrada_conf
 		;; > CONFIGURACION
 		;; > PUNTAJES ALTOS
 		;; > SALIR
@@ -209,19 +213,47 @@ inicio:
 		;;;;;;;;;;;;;;;;
 ciclo_juego:
 		call pintar_mapa
+		;call delay
 		call entrada_juego
 		mov CAJA, 3
 		jmp ciclo_juego
 		;;;;;;;;;;;;;;;;
-
-cargar_un_nivel:
+cargar_un_nivel: ;;Nivel 0
 		mov AL, 00
 		mov DX, offset nivel_x
 		mov AH, 3dh
 		int 21
 		jc inicio
 		mov [handle_nivel], AX
+		jmp ciclo_lineas
 		;;
+cargar_un_nivel0: ;;Nivel 0
+		mov AL, 00
+		mov DX, offset nivel_0
+		mov AH, 3dh
+		int 21
+		jc inicio
+		mov [handle_nivel], AX
+		jmp ciclo_lineas
+		;;
+cargar_un_nivel1: ;;Nivel 0
+		mov AL, 00
+		mov DX, offset nivel_1
+		mov AH, 3dh
+		int 21
+		jc inicio
+		mov [handle_nivel], AX
+		jmp ciclo_lineas
+		;;
+cargar_un_nivel2: ;;Nivel 0
+		mov AL, 00
+		mov DX, offset nivel_2
+		mov AH, 3dh
+		int 21
+		jc inicio
+		mov [handle_nivel], AX
+		jmp ciclo_lineas
+
 ciclo_lineas:
 		mov BX, [handle_nivel]
 		call siguiente_linea
@@ -280,6 +312,7 @@ es_suelo:
 es_objetivo:
 		mov AL, OBJETIVO
 		mov [elemento_actual], AL
+		add [puntos_obj], 1
 		jmp continuar_parseo0
 es_jugador:
 		mov AL, JUGADOR
@@ -364,13 +397,6 @@ fin_parseo:
 		jmp ciclo_juego
 		jmp fin
 
-;; pintar_pixel - pintar un pixel
-;; ENTRADA:
-;;     AX --> x pixel
-;;     BX --> y pixel
-;;     CL --> color
-;; SALIDA: pintar pixel
-;; AX + 320*BX
 pintar_pixel:
 		push AX
 		push BX
@@ -400,12 +426,6 @@ pintar_pixel:
 		pop AX
 		ret
 
-;; pintar_sprite - pinta un sprite
-;; Entrada:
-;;    - DI: offset del sprite
-;;    - SI: offset de las dimensiones
-;;    - AX: x sprite 320x200
-;;    - BX: y sprite 320x200
 pintar_sprite:
 		push DI
 		push SI
@@ -447,9 +467,9 @@ fin_pintar_sprite:
 delay:
 		push SI
 		push DI
-		mov SI, 0200
+		mov SI, 0500
 cicloA:
-		mov DI, 0130
+		mov DI, 0100
 		dec SI
 		cmp SI, 0000
 		je fin_delay
@@ -462,6 +482,7 @@ fin_delay:
 		pop DI
 		pop SI
 		ret
+		
 ;; clear_pantalla - limpia la pantalla
 ;; ..
 ;; ..
@@ -483,7 +504,6 @@ clear_h:
 		loop clear_v
 		ret
 
-
 ;; menu_principal - menu principal
 ;; ..
 ;; SALIDA
@@ -500,7 +520,7 @@ menu_principal:
 		mov [yFlecha], BX
 		;; IMPRIMIR OPCIONES ;;
 		;;;; INICIAR JUEGO
-		mov DL, 0c
+		mov DL, 0ch
 		mov DH, 05
 		mov BH, 00
 		mov AH, 02
@@ -662,7 +682,6 @@ colocar_en_mapa:
 		mov [DI], DL
 		ret
 
-
 ;; obtener_de_mapa - obtiene un elemento en el mapa
 ;; ENTRADA:
 ;;    - AH -> x
@@ -680,7 +699,6 @@ obtener_de_mapa:
 		add DI, AX
 		mov DL, [DI]
 		ret
-
 
 ;; pintar_mapa - pinta los elementos del mapa
 ;; ENTRADA:
@@ -711,8 +729,9 @@ ciclo_h:
 		;;
                 cmp DL, CAJA
 		je pintar_caja_mapa
-				cmp DL, 6
-		je pintar_caja_mapa
+		;;
+				cmp DL, CAJA_OBJ
+		je pintar_cobj_mapa
 		;;
                 cmp DL, OBJETIVO
 		je pintar_objetivo_mapa
@@ -761,6 +780,14 @@ pintar_caja_mapa:
 		call pintar_sprite
 		pop AX
 		jmp continuar_h
+pintar_cobj_mapa:
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_cobj
+		mov DI, offset data_sprite_cobj
+		call pintar_sprite
+		pop AX
+		jmp continuar_h
 pintar_objetivo_mapa:
 		push AX
 		call adaptar_coordenada
@@ -778,32 +805,7 @@ continuar_v:
 fin_pintar_mapa:
 		call datos_desarrollador
 		ret
-
-datos_desarrollador:
-		mov DH, 18
-		mov DL, 01
-		mov BH, 00
-		mov AH, 02
-		int 10
-		push DX
-		mov DX, offset iniciales
-		mov AH, 09
-		int 21
-		pop DX
-		call puntaje
-		ret
-
-puntaje:
-		mov DH, 18
-		mov DL, 17
-		mov BH, 00
-		mov AH, 02
-		int 10
-		push DX
-		mov DX, offset puntaje_estandar
-		mov AH, 09
-		int 21
-		pop DX
+fin_pintar_mapa2:
 		ret
 
 ;; mapa_quemado - mapa de prueba
@@ -927,12 +929,76 @@ mapa_quemado:
 		call colocar_en_mapa
 		ret
 
+entrada_conf:
+		call clear_pantalla
+		print cambio
+		mov AH, 01
+		int 16
+		;jz fin_entrada_config  ;; nada en el buffer de entrada
+		mov AH, 00
+		int 16
+		;; AH <- scan code
+		cmp AH, [control_arriba]
+		je cambiar_control_arriba
+		cmp AH, [control_abajo]
+		je cambiar_control_abajo
+		cmp AH, [control_izquierda]
+		je cambiar_control_izquierda
+		cmp AH, [control_derecha]
+		je cambiar_control_derecha
+		cmp AH, 3ch
+		je inicio
+		jmp entrada_conf
 
+cambiar_control_arriba:
+		mov AH, 09h
+		mov DX, offset mensaje_control_arriba
+		int 21h
+		mov AH, 01
+		int 16
+		mov AH, 00
+		int 16
+		mov [control_arriba], AH
+		jmp entrada_conf
+cambiar_control_abajo:
+		mov AH, 09h
+		mov DX, offset mensaje_control_abajo
+		int 21h
+		mov AH, 01
+		int 16
+		mov AH, 00
+		int 16
+		mov [control_abajo], AH
+		jmp entrada_conf
+cambiar_control_izquierda:
+		mov AH, 09h
+		mov DX, offset mensaje_control_izquierda
+		int 21h
+		mov AH, 01
+		int 16
+		mov AH, 00
+		int 16
+		mov [control_izquierda], AH
+		jmp entrada_conf
+cambiar_control_derecha:
+		mov AH, 09h
+		mov DX, offset mensaje_control_derecha
+		int 21h
+		mov AH, 01
+		int 16
+		mov AH, 00
+		int 16
+		mov [control_derecha], AH
+		jmp entrada_conf
+
+
+fin_entrada_config:
+		ret
 ;; entrada_juego - manejo de las entradas del juego
 entrada_juego:
 		mov AH, 01
 		int 16
-		jz fin_entrada_juego  ;; nada en el buffer de entrada
+		;jz fin_entrada_juego  ;; nada en el buffer de entrada
 		mov AH, 00
 		int 16
 		;; AH <- scan code
@@ -945,6 +1011,7 @@ entrada_juego:
 		cmp AH, [control_derecha]
 		je mover_jugador_der
 		cmp AH, 3ch
+		je pausa
 		ret
 mover_jugador_arr:
 		mov AH, [xJugador]
@@ -964,6 +1031,8 @@ mover_jugador_arr:
 		je hay_pared_arriba
 		;;
 		; if the following space is an obj, then we will set it to 1
+		call aumentar_puntos_par
+		
 		cmp DL, OBJETIVO
 		je on_encima_obj_arr
 		;;
@@ -997,8 +1066,8 @@ ver_caja_arr:
 		je hay_pared_arriba
 
 		;; Si esta el objetivo adelante, se mueve
-		cmp DL, OBJETIVO
 		call aumentar_puntos
+		call aumentar_puntos_par
 
 		cmp encima_obj, 1
 		je off_encima_obj_arr1
@@ -1097,6 +1166,7 @@ mover_jugador_aba:
 		je ver_caja_aba
 		;;
 		; if the following space is an obj, then we will set it to 1
+		call aumentar_puntos_par
 		cmp DL, OBJETIVO
 		je on_encima_obj_aba
 		;;
@@ -1130,8 +1200,8 @@ ver_caja_aba:
 		je hay_pared_abajo
 
 		;; Si esta el objetivo adelante, se mueve
-		cmp DL, OBJETIVO
 		call aumentar_puntos
+		call aumentar_puntos_par
 
 		cmp encima_obj, 1
 		je off_encima_obj_aba1
@@ -1232,6 +1302,7 @@ mover_jugador_izq:
 		je hay_pared_izquierda
 		;;
 		; if the following space is an obj, then we will set it to 1
+		call aumentar_puntos_par
 		cmp DL, OBJETIVO
 		je on_encima_obj_izq
 		;;
@@ -1266,8 +1337,8 @@ ver_caja_izq:
 		je hay_pared_izquierda
 
 		;; Si esta el objetivo adelante, se mueve
-		cmp DL, OBJETIVO
 		call aumentar_puntos
+		call aumentar_puntos_par
 
 		cmp encima_obj, 1
 		je off_encima_obj_izq1
@@ -1366,6 +1437,8 @@ mover_jugador_der:
 		je hay_pared_derecha
 		;;
 		; if the following space is an obj, then we will set it to 1
+		call aumentar_puntos_par
+		
 		cmp DL, OBJETIVO
 		je on_encima_obj_der
 		;;
@@ -1400,6 +1473,7 @@ ver_caja_der:
 
 		;; Si esta el objetivo adelante, se mueve
 		call aumentar_puntos
+		call aumentar_puntos_par
 
 		cmp encima_obj, 1
 		je off_encima_obj_der1
@@ -1486,11 +1560,131 @@ fin_entrada_juego:
 
 aumentar_puntos:
 		cmp DL, OBJETIVO
-		je agregar_punto
+		je agregar_punto_obj
 		ret
-agregar_punto:
-		add puntos, 1
+agregar_punto_obj:
+		sub puntos_obj, 1
 		mov CAJA, 6
+		cmp [puntos_obj], 0
+		je siguiente_nivel
+		ret
+
+aumentar_puntos_par:
+		inc puntos_par
+		ret
+
+;;;;;;;;;;;;;;;;;;;;
+;MENU PAUSA
+;;;;;;;;;;;;;;;;;;;
+
+pausa:
+		;;;;;;;;;;;;;;;;
+		call menu_pausa
+		mov AL, [opcion]
+		;; > INICIAR JUEGO
+		cmp AL, 0
+		je ciclo_juego
+		;; > CARGAR NIVEL
+		cmp AL, 1
+		je inicio
+		;;;;;;;;;;;;;;;;
+
+menu_pausa:
+		call clear_pantalla
+		mov AL, 0
+		mov [opcion], AL      ;; reinicio de la variable de salida
+		mov AL, 2
+		mov [maximo], AL
+		mov AX, 50
+		mov BX, 28
+		mov [xFlecha], AX
+		mov [yFlecha], BX
+		;; IMPRIMIR OPCIONES ;;
+		;;;; INICIAR JUEGO
+		mov DL, 0ch
+		mov DH, 05
+		mov BH, 00
+		mov AH, 02
+		int 10
+		;; <<-- posicionar el cursor
+		push DX
+		mov DX, offset pausa_cont
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		;;;; CARGAR NIVEL
+		add DH, 02
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset pausa_salir
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		call pintar_flecha
+		;;;;
+		;; LEER TECLA
+		;;;;
+entrada_menu_pausa:
+		mov AH, 00
+		int 16
+		cmp AH, 48
+		je restar_opcion_menu_pausa
+		cmp AH, 50
+		je sumar_opcion_menu_pausa
+		cmp AH, 3bh  ;; le doy F1
+		je fin_menu_pausa
+		jmp entrada_menu_pausa
+restar_opcion_menu_pausa:
+		mov AL, [opcion]
+		dec AL
+		cmp AL, 0ff
+		je volver_a_ceroP
+		mov [opcion], AL
+		jmp mover_flecha_menu_pausa
+sumar_opcion_menu_pausa:
+		mov AL, [opcion]
+		mov AH, [maximo]
+		inc AL
+		cmp AL, AH
+		je volver_a_maximoP
+		mov [opcion], AL
+		jmp mover_flecha_menu_pausa
+volver_a_ceroP:
+		mov AL, 0
+		mov [opcion], AL
+		jmp mover_flecha_menu_pausa
+volver_a_maximoP:
+		mov AL, [maximo]
+		dec AL
+		mov [opcion], AL
+		jmp mover_flecha_menu_pausa
+mover_flecha_menu_pausa:
+		mov AX, [xFlecha]
+		mov BX, [yFlecha]
+		mov SI, offset dim_sprite_vacio
+		mov DI, offset data_sprite_vacio
+		call pintar_sprite
+		mov AX, 50
+		mov BX, 28
+		mov CL, [opcion]
+ciclo_ubicar_flecha_menu_pausa:
+		cmp CL, 0
+		je pintar_flecha_menu_pausa
+		dec CL
+		add BX, 10
+		jmp ciclo_ubicar_flecha_menu_pausa
+pintar_flecha_menu_pausa:
+		mov [xFlecha], AX
+		mov [yFlecha], BX
+		call pintar_flecha
+		jmp entrada_menu_pausa
+		;;
+
+fin_menu_pausa:
 		ret
 ;; siguiente_linea - extrae la siguiente línea del archivo referenciado por el handle en BX
 ;; ENTRADA:
@@ -1526,19 +1720,7 @@ quitar_nl_y_fin:
 fin_siguiente_linea:
 		mov DL, 0ff   ;; ya finalizó el archivo
 		ret
-;;
-imprimir_datos_personales:
-    print msg_linea
-    print msg_universidad
-    print msg_facultad
-    print msg_escuela
-    print msg_arqui
-	print epacio
-    print msg_nombre
-    print msg_carne
-    print msg_linea2
 
-;;
 ;; cadena_igual - verifica que dos cadenas sean iguales
 ;; ENTRADA:
 ;;    - SI: cadena 1, con su tamaño en el primer byte
@@ -1563,7 +1745,6 @@ fin_cadena_igual:
 		mov DL, 00
 		ret
 
-
 ;; ignorar_espacios - ignora una sucesión de espacios
 ;; ENTRADA:
 ;;    - DI: offset de una cadena cuyo primer byte se supone es un espacio
@@ -1578,7 +1759,6 @@ ciclo_ignorar:
 fin_ignorar:
 		ret
 
-
 ;; memset - memset
 ;; ENTRADA:
 ;;    - DI: offset del inicio de la cadena de bytes
@@ -1592,7 +1772,6 @@ ciclo_memset:
 		loop ciclo_memset
 		pop DI
 		ret
-
 
 ;; leer_cadena_numerica - lee una cadena que debería estar compuesta solo de números
 ;; ENTRADA:
@@ -1632,7 +1811,165 @@ ciclo_copiar_num:
 		loop ciclo_copiar_num
 		pop DI
 		ret
+;;; 
+;; datos del desarrollador 
+;; es una prueba 
+datos_desarrollador:
+		mov DH, 18
+		mov DL, 01
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset iniciales
+		mov AH, 09
+		int 21
+		pop DX
 
+puntaje2:
+		mov DH, 0
+		mov DL, 20
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov AX, puntos_par
+		call printax
+		pop DX
+		ret
+		
+print_char:
+		mov DI, BX
+		mov AL, [DI]
+		cmp AL, 00
+		je end_print
+		cmp SI, 0005
+		je end_print
+		mov CX, 0001
+		mov AH, 09
+		int 21
+		inc BX
+		inc SI
+		inc DL
+		jmp print_char
+
+end_print:
+		ret
+; ciclo_escribir_monto:
+; 		mov DI, DX
+; 		mov AL, [DI]
+; 		cmp AL, 00
+; 		je fin_pintar_mapa2
+; 		cmp SI, 0005
+; 		je fin_pintar_mapa2
+; 		mov CX, 0001
+; 		push DX
+		
+; 		mov AH, 09
+; 		int 21
+; 		pop DX
+; 		inc DX
+; 		inc SI
+; 		jmp ciclo_escribir_monto
+; 		;;
+;;
+siguiente_nivel:
+		;; clear_pantalla - limpia la pantalla
+		call clear_pantalla
+		mov caja, 3
+		;call reset_map
+		;;
+		;; imprimir_datos_personales - imprime los datos personales
+		add niveles, 1
+		cmp niveles, 1
+		je cargar_un_nivel1
+		cmp niveles, 2
+		je cargar_un_nivel2
+		cmp niveles, 3
+		je inicio
+
+
+printax proc
+    mov cx, 0
+    mov bx, 10
+@@loophere:
+    mov dx, 0
+    div bx                         
+    push ax
+    add dl, '0'                    
+    pop ax                         
+    push dx                        
+    inc cx                         
+    cmp ax, 0                      
+	jnz @@loophere
+    mov ah, 2                     
+@@loophere2:
+    pop dx                         
+    int 21h                        
+    loop @@loophere2
+    ret
+printax endp
+;; numAcadena
+;; ENTRADA:
+;;     AX -> número a convertir    
+;; SALIDA:
+;;    [numero] -> numero convertido en cadena
+;;AX = 1500
+;;CX = AX  <<<<<<<<<<<
+;;[31][30][30][30][30]
+;;                  ^
+numAcadena:
+		mov CX, 0005
+		mov DI, offset numero2
+ciclo_poner30s:
+		mov BL, 30
+		mov [DI], BL
+		inc DI
+		dec cx
+		cmp cx, 0
+		jne ciclo_poner30s
+		;; tenemos '0' en toda la cadena
+		mov CX, 0    ; inicializar contador
+		mov DI, offset numero2
+		add DI, 0004
+		;;
+ciclo_convertirAcadena:
+		mov BL, [DI]
+		inc BL
+		mov [DI], BL
+		cmp BL, 3ah
+		je aumentar_siguiente_digito_primera_vez
+		loop ciclo_convertirAcadena
+		jmp retorno_convertirAcadena
+aumentar_siguiente_digito_primera_vez:
+		push DI
+aumentar_siguiente_digito:
+		mov BL, 30     ; poner en '0' el actual
+		mov [DI], BL
+		dec DI         ; puntero a la cadena
+		mov BL, [DI]
+		inc BL
+		mov [DI], BL
+		cmp BL, 3ah
+		je aumentar_siguiente_digito
+		pop DI         ; se recupera DI
+		loop ciclo_convertirAcadena
+retorno_convertirAcadena:
+		ret
+
+;; IMPRIMIR DATOS PERSONALES
+imprimir_datos_personales:
+    print msg_linea
+    print msg_universidad
+    print msg_facultad
+    print msg_escuela
+    print msg_arqui
+	print msg_arqui1
+    print msg_nombre
+    print msg_carne
+    print msg_linea2
+
+;;;
 ;; cadenaAnum
 ;; ENTRADA:
 ;;    DI -> dirección a una cadena numérica
@@ -1659,5 +1996,5 @@ retorno_cadenaAnum:
 
 
 fin:
-	.EXIT
+.EXIT
 END
