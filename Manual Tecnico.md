@@ -8,57 +8,55 @@ Requerimiento de Ejecucion: EMU8086, DOSBOX y MASM
 Procesador: Intel Core i3 o superiores.
 Tipo de Sistema: 64bit.
 ```
+
 # Ejecución de la Aplicación
 
-_Para ejecutar la aplicación el usuario debera tener instalado los programas requeridos, una vez instalados los programas el usuario debera abrir el programa DOSBOX y correr el sigueinte comando "main.asm" esto para poder generar un ejecutable con extención .exe._
+*Para realizar está acción el usuario debera de colocar su proyecto en la carpeta C de donde instalo assembler (En el video explica donde tiene que ir ubicada la carpeta MASM11) se deja un ejemplo donde puede ir la carpeta.*
 
-## Credenciales para el ingreso de la aplicación
+![Ejemplo](/Imagenes/Ubiacion.jpg)
 
-_Tecnicamente se debe de iniciar sesión para poder ingresar a la aplicación, para esto se tiene un archivo "PRAII.CON" con las credenciales del creador para poder ingresar a la app_
-<br>
-<br>
-![Credencials](/Imagenes/Credenciales.jpg)
-<br>
+_Al tener nuestra carpeta aquí podemos entrar a las configuraciones de DosBOX y cambiar la ruta para la compilación del archivo_
 
-## Invocación de la macros para facilitar la impresión
+![Options](Imagenes/Options.jpg)
 
-![Impresion](/Imagenes/Macros.jpg)
+*Como podemos observar en la imagen anterior, tenemos que buscar esta opcion para poder ingresar a las opciones de DosBox, al entrar se nos abrira un archivo txt en el cual iremos hasta el final del mismo y enocontraremos el apartado de autoexec en el cual pondremos la siguiente ruta que se muestra en la imagen*
 
-_Como se puede apreciar en el codigo en la primera linea hacemos la importación de la macros para poder simplificar el codigo a la hora de imprimir_<br>
+![Configuracion](Imagenes/Configuracion.jpg)
 
-_Consiguiente a esto podemos ver que además de que todo el codigo se encuentra comentado las acciones que se van realizando para poder ir guardando la información en las direcciones de memoria, como podremos ver en la sentencia mov AH, 9 hacemos la interrupción 21 para poder imprimir una cadena de texto_ <br>
+```
+mount c C:\MASM\MASM611\BIN
+Para agregar la ruta del exe
+mount d C:\MASM\MASM611\Nombredelacarpetadelproyecto
+```
+*Y listo, con eso ya tienen confidurada la ruta para poder compilar y ejecutar, para lo cual veremos a continuacion como se compila y se ejecuta.*
 
-_Prosiguiendo con la sentencia procedemos a colocar el radix 16 esto para darle entender al ensambador que vamos a utilizar hexadecimales esto para tener una mayor facilidad con el ensamblador_<br>
+![Compilacion](Imagenes/Compilacion.jpg)
+![Ejecucion](Imagenes/Ejecucion.jpg)
 
-![variables](/Imagenes/Variables.jpg)
+# Sprites de los personajes
 
-<br>
+*En la siguiente porcion de codigo podremos ver cada uno de los sprites que se usaran dentro del juego, estos se crearon mediante una matriz de 8x8 bits*
 
-_En esta parte del codigo podemos ver que se declaran las variables que se van a utilizar para poder guardar la información estara en el programa, se declaran las variables de tipo byte, esto para poder guardar la información los tipos que estamos usando es byte de 8 bits_<br>
+![Sprites](Imagenes/Sprite.jpg)
 
-_En la siguiente porción de codigo podremos observar como declararemos las variables para poder usar los textos, estas estaran usando 0a para poder dejar un espacio en blanco y el signo de $ para poder darle un fin al espacio de linea que deja el texto_<br>
+![Sprites](Imagenes/Sprite1.jpg)
 
-![Codigo](/Imagenes/Var.jpg)
-<br>
+*En la siguiente imagen se mostraran las variables*
 
-_Al inicio del encabezado se hizo una prubea para poder convertir una cadena de numeros hacía cadena de texto, por lo cual no tiene mayor relevacia, de ahí se coloca el encabezado_
-<br>
+![Variables](Imagenes/Variables.jpg)
 
-![Codigo](/Imagenes/Encabezado.jpg)
-<br>
+# Funciones
 
-_En la parte de los menus, la logica es la misma para todos los siguientes, por lo tanto podremos ver como se va moviendo la información, junto al salto 08 y la interrupción 21 se puede hacer la comparación del texto, de manera sencilla se usa el codigo ascii para poder hacer la comparación de la entrada de texto y la opcion que necesitamos al igual se ven los comentarios a que ascii pertenece cada una de las letras y usamos los saltos je y jmp para ir a las etiquetas_
-<br>
+*En la siguiente imagen se mostraran las funciones que se usaron para poder cargar el juego y que se mostrara en la pantalla principal*
 
-![Codigo](/Imagenes/Menus.jpg)
+![Funciones](Imagenes/Principales.jpg)
 
-<br>
+*Objetos usados en las partidas*
 
-_En la siguiente parte podremos observar como vamos moviendo la información sobre la dirección de memoria usando [] esto para ir indicando a cada uno de los registros en donde se tienen que colocar para poder ir a obtener la información para poderla seguir guardando y generando_
+![Objetos](Imagenes/Object.jpg)
 
-<br>
+*Parseos*
 
-![Codigo](/Imagenes/Etiqueta.jpg)
+![Parseos](Imagenes/Parseos.jpg)
 
-<br>
-
+*Por consiguiente, dentro del codigo va explicitamente comentado que realiza cada una de las acciones correspondientes*
